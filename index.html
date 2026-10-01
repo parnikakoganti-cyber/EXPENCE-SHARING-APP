@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ExpenseSplit - Expense Sharing App</title>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Our CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         AUTHENTICATION PAGE
+         ===================================================== -->
+
+    <div id="authPage" class="auth-page">
+
+        <div class="auth-container">
+
+            <!-- Logo -->
+            <div class="auth-brand">
+                <i class="fa-solid fa-wallet"></i>
+                <h1>ExpenseSplit</h1>
+                <p>Share expenses. Track balances. Stay organized.</p>
+            </div>
+
+
+            <!-- ================= USER LOGIN ================= -->
+
+            <div id="loginBox" class="auth-box">
+
+                <h2>User Login</h2>
+                <p class="auth-subtitle">Login to your ExpenseSplit account</p>
+
+                <form id="loginForm">
+
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+
+                        <input
+                            type="email"
+                            id="loginEmail"
+                            placeholder="Enter your email"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            placeholder="Enter your password"
+                            required
+                        >
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        Login
+                    </button>
+
+                </form>
+
+                <p class="switch-auth">
+                    Don't have an account?
+                    <button type="button" id="showSignupBtn">
+                        Sign Up
+                    </button>
+                </p>
+
+                <button type="button" id="showAdminLoginBtn"
+                        class="admin-login-link">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Admin Login
+                </button>
+
+            </div>
+
+
+            <!-- ================= USER SIGNUP ================= -->
+
+            <div id="signupBox" class="auth-box hidden">
+
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Create your ExpenseSplit account</p>
+
+                <form id="signupForm">
+
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+
+                        <input
+                            type="text"
+                            id="signupName"
+                            placeholder="Enter your name"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+
+                        <input
+                            type="email"
+                            id="signupEmail"
+                            placeholder="Enter your email"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+
+                        <input
+                            type="password"
+                            id="signupPassword"
+                            placeholder="Create a password"
+                            required
+                        >
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-user-plus"></i>
+                        Create Account
+                    </button>
+
+                </form>
+
+                <p class="switch-auth">
+                    Already have an account?
+
+                    <button type="button" id="showLoginBtn">
+                        Login
+                    </button>
+                </p>
+
+            </div>
+
+
+            <!-- ================= ADMIN LOGIN ================= -->
+
+            <div id="adminLoginBox" class="auth-box hidden">
+
+                <h2>Admin Login</h2>
+                <p class="auth-subtitle">
+                    Access the ExpenseSplit administration panel
+                </p>
+
+                <form id="adminLoginForm">
+
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email</label>
+
+                        <input
+                            type="email"
+                            id="adminEmail"
+                            placeholder="Enter admin email"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+
+                        <input
+                            type="password"
+                            id="adminPassword"
+                            placeholder="Enter admin password"
+                            required
+                        >
+                    </div>
+
+
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Admin Login
+                    </button>
+
+                </form>
+
+                <p class="switch-auth">
+
+                    <button type="button" id="backToUserLoginBtn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back to User Login
+                    </button>
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         USER APPLICATION
+         ===================================================== -->
+
+    <div id="userApp" class="app hidden">
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="app-header">
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+
+                <div>
+                    <h1>ExpenseSplit</h1>
+                    <span>Expense Sharing App</span>
+                </div>
+
+            </div>
+
+
+            <div class="header-user">
+
+                <div class="user-info">
+
+                    <i class="fa-solid fa-circle-user"></i>
+
+                    <div>
+                        <strong id="loggedUserName">
+                            User
+                        </strong>
+
+                        <small id="loggedUserEmail">
+                            user@email.com
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <button id="logoutBtn" class="icon-btn"
+                        title="Logout">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= USER LAYOUT ================= -->
+
+        <div class="dashboard-layout">
+
+
+            <!-- ================= SIDEBAR ================= -->
+
+            <aside class="sidebar">
+
+                <nav>
+
+                    <button class="nav-btn active"
+                            data-section="dashboardSection">
+
+                        <i class="fa-solid fa-chart-pie"></i>
+                        Dashboard
+
+                    </button>
+
+
+                    <button class="nav-btn"
+                            data-section="expenseSection">
+
+                        <i class="fa-solid fa-receipt"></i>
+                        Expenses
+
+                    </button>
+
+
+                    <button class="nav-btn"
+                            data-section="balanceSection">
+
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        Balances
+
+                    </button>
+
+
+                    <button class="nav-btn"
+                            data-section="historySection">
+
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Expense History
+
+                    </button>
+
+
+                    <button class="nav-btn"
+                            data-section="paymentSection">
+
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                        Payments
+
+                    </button>
+
+                </nav>
+
+            </aside>
+
+
+
+            <!-- ================= MAIN CONTENT ================= -->
+
+            <main class="main-content">
+
+
+                <!-- ============================================
+                     USER DASHBOARD
+                     ============================================ -->
+
+                <section id="dashboardSection"
+                         class="content-section active-section">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Dashboard</h2>
+
+                            <p>
+                                Welcome back!
+                                Here's your expense overview.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUMMARY CARDS -->
+
+                    <div class="summary-grid">
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon green">
+                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                            </div>
+
+                            <div>
+                                <span>Total Expenses</span>
+
+                                <strong id="dashboardTotalExpenses">
+                                    ₹0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon red">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </div>
+
+                            <div>
+                                <span>You Owe</span>
+
+                                <strong id="dashboardYouOwe">
+                                    ₹0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon blue">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </div>
+
+                            <div>
+                                <span>You Will Receive</span>
+
+                                <strong id="dashboardYouReceive">
+                                    ₹0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon purple">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+
+                            <div>
+                                <span>Settled</span>
+
+                                <strong id="dashboardSettled">
+                                    ₹0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RECENT EXPENSES -->
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                <i class="fa-solid fa-clock"></i>
+                                Recent Expenses
+                            </h3>
+
+                            <button class="text-btn"
+                                    data-section="expenseSection">
+                                View All
+                            </button>
+
+                        </div>
+
+                        <div id="dashboardRecentExpenses"
+                             class="expense-list">
+
+                            <div class="empty-state">
+                                No expenses recorded yet.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ============================================
+                     EXPENSE MANAGEMENT
+                     ============================================ -->
+
+                <section id="expenseSection"
+                         class="content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+                            <h2>Expense Management</h2>
+
+                            <p>
+                                Add and manage shared expenses.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- ADD EXPENSE -->
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                <i class="fa-solid fa-plus-circle"></i>
+                                Add New Expense
+                            </h3>
+
+                        </div>
+
+
+                        <form id="expenseForm">
+
+                            <div class="form-grid">
+
+                                <div class="form-group">
+
+                                    <label for="expenseDescription">
+                                        Expense Name
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="expenseDescription"
+                                        placeholder="e.g. Dinner"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label for="expenseAmount">
+                                        Amount
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        id="expenseAmount"
+                                        placeholder="₹0.00"
+                                        min="1"
+                                        step="0.01"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label for="expensePayer">
+                                        Paid By
+                                    </label>
+
+                                    <select id="expensePayer"
+                                            required>
+                                    </select>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label for="splitMethod">
+                                        Split Method
+                                    </label>
+
+                                    <select id="splitMethod">
+
+                                        <option value="equal">
+                                            Equal Split
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- PARTICIPANTS -->
+
+                            <div class="participants-area">
+
+                                <label>
+                                    Participants
+                                </label>
+
+                                <div id="participantsList"
+                                     class="participants-list">
+                                </div>
+
+                            </div>
+
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="fa-solid fa-check"></i>
+                                Add Expense
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- CURRENT EXPENSES -->
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                <i class="fa-solid fa-list"></i>
+                                Current Expenses
+                            </h3>
+
+                        </div>
+
+                        <div id="expenseManagementList"
+                             class="expense-list">
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ============================================
+                     BALANCES
+                     ============================================ -->
+
+                <section id="balanceSection"
+                         class="content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Balance Tracking</h2>
+
+                            <p>
+                                See who owes whom.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="balance-grid">
+
+                        <div class="dashboard-card">
+
+                            <div class="card-header">
+
+                                <h3>
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                    You Owe
+                                </h3>
+
+                            </div>
+
+                            <div id="youOweList"
+                                 class="balance-list">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="card-header">
+
+                                <h3>
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                    Others Owe You
+                                </h3>
+
+                            </div>
+
+                            <div id="othersOweList"
+                                 class="balance-list">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ============================================
+                     EXPENSE HISTORY
+                     ============================================ -->
+
+                <section id="historySection"
+                         class="content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Expense History</h2>
+
+                            <p>
+                                Review all previously recorded expenses.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div id="expenseHistoryList"
+                             class="expense-list">
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ============================================
+                     PAYMENTS
+                     ============================================ -->
+
+                <section id="paymentSection"
+                         class="content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Payments</h2>
+
+                            <p>
+                                Track your pending and completed payments.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                <i class="fa-solid fa-money-bill-transfer"></i>
+                                Payment Tracking
+                            </h3>
+
+                        </div>
+
+
+                        <div id="paymentList"
+                             class="payment-list">
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            </main>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ADMIN APPLICATION
+         ===================================================== -->
+
+    <div id="adminApp" class="app hidden">
+
+        <!-- ================= ADMIN HEADER ================= -->
+
+        <header class="app-header admin-header">
+
+            <div class="brand">
+
+                <div class="brand-icon admin-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+                <div>
+                    <h1>ExpenseSplit</h1>
+                    <span>Admin Dashboard</span>
+                </div>
+
+            </div>
+
+
+            <div class="header-user">
+
+                <div class="user-info">
+
+                    <i class="fa-solid fa-user-shield"></i>
+
+                    <div>
+                        <strong>Administrator</strong>
+                        <small>Admin Account</small>
+                    </div>
+
+                </div>
+
+
+                <button id="adminLogoutBtn"
+                        class="icon-btn"
+                        title="Logout">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= ADMIN LAYOUT ================= -->
+
+        <div class="dashboard-layout">
+
+
+            <!-- ADMIN SIDEBAR -->
+
+            <aside class="sidebar admin-sidebar">
+
+                <nav>
+
+                    <button class="admin-nav-btn active"
+                            data-admin-section="adminDashboardSection">
+
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
+
+                    </button>
+
+
+                    <button class="admin-nav-btn"
+                            data-admin-section="adminUsersSection">
+
+                        <i class="fa-solid fa-users"></i>
+                        Registered Users
+
+                    </button>
+
+
+                    <button class="admin-nav-btn"
+                            data-admin-section="adminExpensesSection">
+
+                        <i class="fa-solid fa-receipt"></i>
+                        Monitor Expenses
+
+                    </button>
+
+
+                    <button class="admin-nav-btn"
+                            data-admin-section="adminSummarySection">
+
+                        <i class="fa-solid fa-chart-column"></i>
+                        Expense Summary
+
+                    </button>
+
+                </nav>
+
+            </aside>
+
+
+
+            <!-- ADMIN MAIN CONTENT -->
+
+            <main class="main-content">
+
+
+                <!-- ADMIN DASHBOARD -->
+
+                <section id="adminDashboardSection"
+                         class="admin-content-section active-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Admin Dashboard</h2>
+
+                            <p>
+                                Monitor and manage the ExpenseSplit system.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-grid">
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon blue">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+
+                            <div>
+
+                                <span>Registered Users</span>
+
+                                <strong id="adminUserCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon green">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+
+                            <div>
+
+                                <span>Total Expenses</span>
+
+                                <strong id="adminExpenseCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon purple">
+                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                            </div>
+
+                            <div>
+
+                                <span>Total Amount</span>
+
+                                <strong id="adminTotalAmount">
+                                    ₹0.00
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <div class="summary-icon red">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+
+                            <div>
+
+                                <span>Pending Payments</span>
+
+                                <strong id="adminPendingPayments">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- REGISTERED USERS -->
+
+                <section id="adminUsersSection"
+                         class="admin-content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Registered Users</h2>
+
+                            <p>
+                                View and manage registered users.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div class="table-wrapper">
+
+                            <table class="data-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="adminUsersTable">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- MONITOR EXPENSES -->
+
+                <section id="adminExpensesSection"
+                         class="admin-content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Monitor Expenses</h2>
+
+                            <p>
+                                View all recorded expenses.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-card">
+
+                        <div id="adminExpensesList"
+                             class="expense-list">
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- EXPENSE SUMMARY -->
+
+                <section id="adminSummarySection"
+                         class="admin-content-section">
+
+                    <div class="page-heading">
+
+                        <div>
+
+                            <h2>Expense Summary</h2>
+
+                            <p>
+                                Overall expense and payment statistics.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-grid">
+
+                        <div class="summary-card">
+
+                            <span>Total Spending</span>
+
+                            <strong id="summaryTotalSpending">
+                                ₹0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <span>Completed Payments</span>
+
+                            <strong id="summaryCompletedPayments">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="summary-card">
+
+                            <span>Pending Payments</span>
+
+                            <strong id="summaryPendingPayments">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+
+</body>
+</html>
