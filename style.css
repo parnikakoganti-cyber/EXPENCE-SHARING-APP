@@ -1499,3 +1499,75 @@ select option {
     }
 
 }
+/* =========================================================
+   MANUAL PARTICIPANTS
+   ========================================================= */
+
+.participants-area {
+    margin-top: 25px;
+    margin-bottom: 20px;
+}
+
+.participants-area > label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.participant-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.participant-input {
+    flex: 1;
+    width: 100%;
+    padding: 12px 14px;
+    background: #0b1118;
+    border: 1px solid #273444;
+    border-radius: 8px;
+    color: #f1f5f9;
+    font-size: 14px;
+    outline: none;
+}
+
+.participant-input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12);
+}
+
+.participant-input::placeholder {
+    color: #64748b;
+}
+
+.remove-participant-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: #3a1720;
+    color: #f87171;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.remove-participant-btn:hover {
+    background: #571d2a;
+}
+
+.add-participant-btn {
+    width: 100%;
+    padding: 11px;
+    border: 1px dashed #10b981;
+    border-radius: 8px;
+    background: transparent;
+    color: #10b981;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.add-participant-btn:hover {
+    background: rgba(16, 185, 129, 0.08);
+}

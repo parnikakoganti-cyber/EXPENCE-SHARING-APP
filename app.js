@@ -1,5 +1,7 @@
 /* =========================================================
-   EXPENSE SPLIT - APPLICATION JAVASCRIPT
+   EXPENSE SPLIT
+   COMPLETE JAVASCRIPT
+   LOGIN + EXPENSES + PARTICIPANTS + BALANCES + DELETE
    ========================================================= */
 
 
@@ -28,7 +30,7 @@ const DEFAULT_ADMIN = {
 
 
 /* =========================================================
-   APPLICATION STATE
+   GLOBAL VARIABLES
    ========================================================= */
 
 let users = [];
@@ -38,24 +40,22 @@ let currentUser = null;
 
 
 /* =========================================================
-   INITIALIZATION
+   START APPLICATION
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
 
     initializeStorage();
 
     loadData();
 
-    setupAuthenticationEvents();
+    setupAuthentication();
 
-    setupUserNavigation();
+    setupNavigation();
 
-    setupAdminNavigation();
+    setupForms();
 
-    setupUserEvents();
-
-    setupAdminEvents();
+    setupParticipantSystem();
 
     restoreSession();
 
@@ -63,19 +63,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   LOCAL STORAGE
+   INITIALIZE STORAGE
    ========================================================= */
 
 function initializeStorage() {
 
-    if (!localStorage.getItem(USERS_KEY)) {
+    let storedUsers = [];
 
-        localStorage.setItem(
-            USERS_KEY,
-            JSON.stringify([DEFAULT_ADMIN])
-        );
+    try {
+
+        storedUsers =
+            JSON.parse(
+                localStorage.getItem(USERS_KEY)
+            ) || [];
+
+    } catch (error) {
+
+        storedUsers = [];
 
     }
+
+
+    if (!Array.isArray(storedUsers)) {
+
+        storedUsers = [];
+
+    }
+
+
+    const adminExists =
+        storedUsers.some(function (user) {
+
+            return (
+                user.role === "admin" &&
+                String(user.email).toLowerCase() ===
+                "admin@expensesplit.com"
+            );
+
+        });
+
+
+    if (!adminExists) {
+
+        storedUsers.push(DEFAULT_ADMIN);
+
+    }
+
+
+    localStorage.setItem(
+        USERS_KEY,
+        JSON.stringify(storedUsers)
+    );
+
 
     if (!localStorage.getItem(EXPENSES_KEY)) {
 
@@ -86,6 +125,7 @@ function initializeStorage() {
 
     }
 
+
     if (!localStorage.getItem(PAYMENTS_KEY)) {
 
         localStorage.setItem(
@@ -94,22 +134,76 @@ function initializeStorage() {
         );
 
     }
+
 }
 
+
+/* =========================================================
+   LOAD DATA
+   ========================================================= */
 
 function loadData() {
 
-    users =
-        JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    try {
 
-    expenses =
-        JSON.parse(localStorage.getItem(EXPENSES_KEY)) || [];
+        users =
+            JSON.parse(
+                localStorage.getItem(USERS_KEY)
+            ) || [];
 
-    payments =
-        JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+    } catch (error) {
+
+        users = [];
+
+    }
+
+
+    try {
+
+        expenses =
+            JSON.parse(
+                localStorage.getItem(EXPENSES_KEY)
+            ) || [];
+
+    } catch (error) {
+
+        expenses = [];
+
+    }
+
+
+    try {
+
+        payments =
+            JSON.parse(
+                localStorage.getItem(PAYMENTS_KEY)
+            ) || [];
+
+    } catch (error) {
+
+        payments = [];
+
+    }
+
+
+    if (!Array.isArray(users)) {
+        users = [];
+    }
+
+    if (!Array.isArray(expenses)) {
+        expenses = [];
+    }
+
+    if (!Array.isArray(payments)) {
+        payments = [];
+    }
 
 }
 
+
+/* =========================================================
+   SAVE DATA
+   ========================================================= */
 
 function saveData() {
 
@@ -118,10 +212,12 @@ function saveData() {
         JSON.stringify(users)
     );
 
+
     localStorage.setItem(
         EXPENSES_KEY,
         JSON.stringify(expenses)
     );
+
 
     localStorage.setItem(
         PAYMENTS_KEY,
@@ -132,120 +228,169 @@ function saveData() {
 
 
 /* =========================================================
-   AUTHENTICATION EVENTS
+   AUTHENTICATION
    ========================================================= */
 
-function setupAuthenticationEvents() {
+function setupAuthentication() {
 
-    /* USER LOGIN */
+    const loginForm =
+        document.getElementById("loginForm");
 
-    document
-        .getElementById("loginForm")
-        .addEventListener("submit", handleUserLogin);
+    const signupForm =
+        document.getElementById("signupForm");
 
-
-    /* USER SIGNUP */
-
-    document
-        .getElementById("signupForm")
-        .addEventListener("submit", handleSignup);
+    const adminForm =
+        document.getElementById("adminLoginForm");
 
 
-    /* ADMIN LOGIN */
+    if (loginForm) {
 
-    document
-        .getElementById("adminLoginForm")
-        .addEventListener(
+        loginForm.addEventListener(
+            "submit",
+            handleUserLogin
+        );
+
+    }
+
+
+    if (signupForm) {
+
+        signupForm.addEventListener(
+            "submit",
+            handleSignup
+        );
+
+    }
+
+
+    if (adminForm) {
+
+        adminForm.addEventListener(
             "submit",
             handleAdminLogin
         );
 
+    }
 
-    /* SHOW SIGNUP */
 
-    document
-        .getElementById("showSignupBtn")
-        .addEventListener(
+    const signupButton =
+        document.getElementById("showSignupBtn");
+
+
+    if (signupButton) {
+
+        signupButton.addEventListener(
             "click",
-            () => {
+            function () {
+
                 showAuthBox("signupBox");
+
             }
         );
 
+    }
 
-    /* SHOW LOGIN */
 
-    document
-        .getElementById("showLoginBtn")
-        .addEventListener(
+    const loginButton =
+        document.getElementById("showLoginBtn");
+
+
+    if (loginButton) {
+
+        loginButton.addEventListener(
             "click",
-            () => {
+            function () {
+
                 showAuthBox("loginBox");
+
             }
         );
 
+    }
 
-    /* SHOW ADMIN LOGIN */
 
-    document
-        .getElementById("showAdminLoginBtn")
-        .addEventListener(
+    const adminButton =
+        document.getElementById("showAdminLoginBtn");
+
+
+    if (adminButton) {
+
+        adminButton.addEventListener(
             "click",
-            () => {
+            function () {
+
                 showAuthBox("adminLoginBox");
+
             }
         );
 
+    }
 
-    /* BACK TO USER LOGIN */
 
-    document
-        .getElementById("backToUserLoginBtn")
-        .addEventListener(
+    const backButton =
+        document.getElementById("backToUserLoginBtn");
+
+
+    if (backButton) {
+
+        backButton.addEventListener(
             "click",
-            () => {
+            function () {
+
                 showAuthBox("loginBox");
+
             }
         );
+
+    }
 
 }
 
 
 /* =========================================================
-   AUTH BOX SWITCHING
+   SHOW AUTH BOX
    ========================================================= */
 
 function showAuthBox(boxId) {
 
-    const boxes = [
+    [
         "loginBox",
         "signupBox",
         "adminLoginBox"
-    ];
+    ].forEach(function (id) {
 
-    boxes.forEach(id => {
+        const box =
+            document.getElementById(id);
 
-        document
-            .getElementById(id)
-            .classList.add("hidden");
+        if (box) {
+
+            box.classList.add("hidden");
+
+        }
 
     });
 
-    document
-        .getElementById(boxId)
-        .classList.remove("hidden");
+
+    const selected =
+        document.getElementById(boxId);
+
+
+    if (selected) {
+
+        selected.classList.remove("hidden");
+
+    }
 
 }
 
 
 /* =========================================================
-   USER SIGNUP
+   SIGN UP
    ========================================================= */
 
 function handleSignup(event) {
 
     event.preventDefault();
-
 
     const name =
         document
@@ -253,14 +398,12 @@ function handleSignup(event) {
             .value
             .trim();
 
-
     const email =
         document
             .getElementById("signupEmail")
             .value
             .trim()
             .toLowerCase();
-
 
     const password =
         document
@@ -288,13 +431,19 @@ function handleSignup(event) {
     }
 
 
-    const existingUser =
-        users.find(
-            user => user.email === email
-        );
+    const exists =
+        users.some(function (user) {
+
+            return (
+                String(user.email)
+                    .toLowerCase() ===
+                email
+            );
+
+        });
 
 
-    if (existingUser) {
+    if (exists) {
 
         alert(
             "An account with this email already exists."
@@ -305,38 +454,45 @@ function handleSignup(event) {
     }
 
 
-    const newUser = {
+    users.push({
 
         id:
-            "user_" +
-            Date.now(),
+            "user_" + Date.now(),
 
-        name: name,
+        name:
+            name,
 
-        email: email,
+        email:
+            email,
 
-        password: password,
+        password:
+            password,
 
-        role: "user",
+        role:
+            "user",
 
-        status: "Active"
+        status:
+            "Active"
 
-    };
+    });
 
-
-    users.push(newUser);
 
     saveData();
 
 
     alert(
-        "Account created successfully! You can now login."
+        "Account created successfully!"
     );
 
 
     document
         .getElementById("signupForm")
         .reset();
+
+
+    document
+        .getElementById("loginEmail")
+        .value = email;
 
 
     showAuthBox("loginBox");
@@ -352,6 +508,8 @@ function handleUserLogin(event) {
 
     event.preventDefault();
 
+    loadData();
+
 
     const email =
         document
@@ -360,7 +518,6 @@ function handleUserLogin(event) {
             .trim()
             .toLowerCase();
 
-
     const password =
         document
             .getElementById("loginPassword")
@@ -368,12 +525,27 @@ function handleUserLogin(event) {
 
 
     const user =
-        users.find(
-            item =>
-                item.email === email &&
-                item.password === password &&
+        users.find(function (item) {
+
+            return (
+
+                String(item.email)
+                    .trim()
+                    .toLowerCase() ===
+                email
+
+                &&
+
+                String(item.password) ===
+                password
+
+                &&
+
                 item.role === "user"
-        );
+
+            );
+
+        });
 
 
     if (!user) {
@@ -390,7 +562,7 @@ function handleUserLogin(event) {
     if (user.status !== "Active") {
 
         alert(
-            "Your account is currently inactive."
+            "Your account is inactive."
         );
 
         return;
@@ -425,6 +597,8 @@ function handleAdminLogin(event) {
 
     event.preventDefault();
 
+    loadData();
+
 
     const email =
         document
@@ -433,7 +607,6 @@ function handleAdminLogin(event) {
             .trim()
             .toLowerCase();
 
-
     const password =
         document
             .getElementById("adminPassword")
@@ -441,12 +614,26 @@ function handleAdminLogin(event) {
 
 
     const admin =
-        users.find(
-            user =>
-                user.email === email &&
-                user.password === password &&
+        users.find(function (user) {
+
+            return (
+
+                String(user.email)
+                    .toLowerCase() ===
+                email
+
+                &&
+
+                String(user.password) ===
+                password
+
+                &&
+
                 user.role === "admin"
-        );
+
+            );
+
+        });
 
 
     if (!admin) {
@@ -469,11 +656,6 @@ function handleAdminLogin(event) {
     );
 
 
-    document
-        .getElementById("adminLoginForm")
-        .reset();
-
-
     showAdminApplication();
 
 }
@@ -485,13 +667,13 @@ function handleAdminLogin(event) {
 
 function restoreSession() {
 
-    const savedUserId =
+    const savedId =
         localStorage.getItem(
             CURRENT_USER_KEY
         );
 
 
-    if (!savedUserId) {
+    if (!savedId) {
 
         showAuthentication();
 
@@ -501,10 +683,11 @@ function restoreSession() {
 
 
     const user =
-        users.find(
-            item =>
-                item.id === savedUserId
-        );
+        users.find(function (item) {
+
+            return item.id === savedId;
+
+        });
 
 
     if (!user) {
@@ -537,7 +720,7 @@ function restoreSession() {
 
 
 /* =========================================================
-   SHOW / HIDE APPLICATIONS
+   SHOW AUTHENTICATION
    ========================================================= */
 
 function showAuthentication() {
@@ -556,8 +739,15 @@ function showAuthentication() {
         .getElementById("adminApp")
         .classList.add("hidden");
 
+
+    showAuthBox("loginBox");
+
 }
 
+
+/* =========================================================
+   SHOW USER APPLICATION
+   ========================================================= */
 
 function showUserApplication() {
 
@@ -567,31 +757,27 @@ function showUserApplication() {
 
 
     document
-        .getElementById("userApp")
-        .classList.remove("hidden");
-
-
-    document
         .getElementById("adminApp")
         .classList.add("hidden");
 
 
+    document
+        .getElementById("userApp")
+        .classList.remove("hidden");
+
+
     updateUserHeader();
 
-    populateExpenseUsers();
+    createInitialParticipant();
 
-    renderUserDashboard();
-
-    renderExpenses();
-
-    renderBalances();
-
-    renderHistory();
-
-    renderPayments();
+    renderEverything();
 
 }
 
+
+/* =========================================================
+   SHOW ADMIN APPLICATION
+   ========================================================= */
 
 function showAdminApplication() {
 
@@ -610,13 +796,7 @@ function showAdminApplication() {
         .classList.remove("hidden");
 
 
-    renderAdminDashboard();
-
-    renderAdminUsers();
-
-    renderAdminExpenses();
-
-    renderAdminSummary();
+    renderAdminEverything();
 
 }
 
@@ -629,124 +809,70 @@ function logout() {
 
     currentUser = null;
 
+
     localStorage.removeItem(
         CURRENT_USER_KEY
     );
+
 
     showAuthentication();
 
 }
 
 
-function setupUserEvents() {
-
-    document
-        .getElementById("logoutBtn")
-        .addEventListener(
-            "click",
-            logout
-        );
-
-
-    document
-        .getElementById("expenseForm")
-        .addEventListener(
-            "submit",
-            handleAddExpense
-        );
-
-}
-
-
-function setupAdminEvents() {
-
-    document
-        .getElementById("adminLogoutBtn")
-        .addEventListener(
-            "click",
-            logout
-        );
-
-}
-
-
 /* =========================================================
-   USER HEADER
+   NAVIGATION
    ========================================================= */
 
-function updateUserHeader() {
-
-    if (!currentUser) return;
-
+function setupNavigation() {
 
     document
-        .getElementById("loggedUserName")
-        .textContent =
-        currentUser.name;
-
-
-    document
-        .getElementById("loggedUserEmail")
-        .textContent =
-        currentUser.email;
-
-}
-
-
-/* =========================================================
-   USER NAVIGATION
-   ========================================================= */
-
-function setupUserNavigation() {
-
-    const buttons =
-        document.querySelectorAll(
-            ".nav-btn"
-        );
-
-
-    buttons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const sectionId =
-                    button.dataset.section;
-
-
-                switchUserSection(
-                    sectionId
-                );
-
-            }
-        );
-
-    });
-
-
-    /* VIEW ALL BUTTONS */
-
-    document
-        .querySelectorAll(
-            ".text-btn"
-        )
-        .forEach(button => {
+        .querySelectorAll(".nav-btn")
+        .forEach(function (button) {
 
             button.addEventListener(
                 "click",
-                () => {
+                function () {
 
-                    const section =
-                        button.dataset.section;
+                    switchUserSection(
+                        button.dataset.section
+                    );
 
-                    if (section) {
+                }
+            );
 
-                        switchUserSection(
-                            section
-                        );
+        });
 
-                    }
+
+    document
+        .querySelectorAll(".text-btn")
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    switchUserSection(
+                        button.dataset.section
+                    );
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".admin-nav-btn")
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    switchAdminSection(
+                        button.dataset.adminSection
+                    );
 
                 }
             );
@@ -756,13 +882,15 @@ function setupUserNavigation() {
 }
 
 
+/* =========================================================
+   USER NAVIGATION
+   ========================================================= */
+
 function switchUserSection(sectionId) {
 
     document
-        .querySelectorAll(
-            ".content-section"
-        )
-        .forEach(section => {
+        .querySelectorAll(".content-section")
+        .forEach(function (section) {
 
             section.classList.remove(
                 "active-section"
@@ -771,22 +899,24 @@ function switchUserSection(sectionId) {
         });
 
 
-    document
-        .getElementById(sectionId)
-        .classList.add(
+    const section =
+        document.getElementById(sectionId);
+
+
+    if (section) {
+
+        section.classList.add(
             "active-section"
         );
 
+    }
+
 
     document
-        .querySelectorAll(
-            ".nav-btn"
-        )
-        .forEach(button => {
+        .querySelectorAll(".nav-btn")
+        .forEach(function (button) {
 
-            button.classList.remove(
-                "active"
-            );
+            button.classList.remove("active");
 
 
             if (
@@ -794,24 +924,11 @@ function switchUserSection(sectionId) {
                 sectionId
             ) {
 
-                button.classList.add(
-                    "active"
-                );
+                button.classList.add("active");
 
             }
 
         });
-
-
-    renderUserDashboard();
-
-    renderExpenses();
-
-    renderBalances();
-
-    renderHistory();
-
-    renderPayments();
 
 }
 
@@ -820,43 +937,11 @@ function switchUserSection(sectionId) {
    ADMIN NAVIGATION
    ========================================================= */
 
-function setupAdminNavigation() {
-
-    const buttons =
-        document.querySelectorAll(
-            ".admin-nav-btn"
-        );
-
-
-    buttons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const sectionId =
-                    button.dataset.adminSection;
-
-
-                switchAdminSection(
-                    sectionId
-                );
-
-            }
-        );
-
-    });
-
-}
-
-
 function switchAdminSection(sectionId) {
 
     document
-        .querySelectorAll(
-            ".admin-content-section"
-        )
-        .forEach(section => {
+        .querySelectorAll(".admin-content-section")
+        .forEach(function (section) {
 
             section.classList.remove(
                 "active-section"
@@ -865,22 +950,24 @@ function switchAdminSection(sectionId) {
         });
 
 
-    document
-        .getElementById(sectionId)
-        .classList.add(
+    const section =
+        document.getElementById(sectionId);
+
+
+    if (section) {
+
+        section.classList.add(
             "active-section"
         );
 
+    }
+
 
     document
-        .querySelectorAll(
-            ".admin-nav-btn"
-        )
-        .forEach(button => {
+        .querySelectorAll(".admin-nav-btn")
+        .forEach(function (button) {
 
-            button.classList.remove(
-                "active"
-            );
+            button.classList.remove("active");
 
 
             if (
@@ -888,98 +975,244 @@ function switchAdminSection(sectionId) {
                 sectionId
             ) {
 
-                button.classList.add(
-                    "active"
-                );
+                button.classList.add("active");
 
             }
 
         });
 
+}
 
-    renderAdminDashboard();
 
-    renderAdminUsers();
+/* =========================================================
+   FORMS
+   ========================================================= */
 
-    renderAdminExpenses();
+function setupForms() {
 
-    renderAdminSummary();
+    const logoutButton =
+        document.getElementById("logoutBtn");
+
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            logout
+        );
+
+    }
+
+
+    const adminLogout =
+        document.getElementById("adminLogoutBtn");
+
+
+    if (adminLogout) {
+
+        adminLogout.addEventListener(
+            "click",
+            logout
+        );
+
+    }
+
+
+    const expenseForm =
+        document.getElementById("expenseForm");
+
+
+    if (expenseForm) {
+
+        expenseForm.addEventListener(
+            "submit",
+            handleAddExpense
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   POPULATE USERS FOR EXPENSE
+   PARTICIPANT SYSTEM
    ========================================================= */
 
-function populateExpenseUsers() {
+function setupParticipantSystem() {
 
-    const payerSelect =
+    const addButton =
         document.getElementById(
-            "expensePayer"
+            "addParticipantBtn"
         );
 
 
-    const participantsList =
+    if (addButton) {
+
+        addButton.addEventListener(
+            "click",
+            addParticipant
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CREATE INITIAL PARTICIPANT
+   ========================================================= */
+
+function createInitialParticipant() {
+
+    const list =
         document.getElementById(
             "participantsList"
         );
 
 
-    const activeUsers =
-        users.filter(
-            user =>
-                user.role === "user" &&
-                user.status === "Active"
+    if (!list) {
+        return;
+    }
+
+
+    if (
+        list.querySelectorAll(
+            ".participant-row"
+        ).length === 0
+    ) {
+
+        addParticipant();
+
+    }
+
+}
+
+
+/* =========================================================
+   ADD PARTICIPANT
+   ========================================================= */
+
+function addParticipant() {
+
+    const list =
+        document.getElementById(
+            "participantsList"
         );
 
 
-    payerSelect.innerHTML =
-        activeUsers
-            .map(
-                user => `
-                    <option value="${user.id}">
-                        ${escapeHTML(user.name)}
-                    </option>
-                `
-            )
-            .join("");
-
-
-    participantsList.innerHTML =
-        activeUsers
-            .map(
-                user => `
-
-                    <label class="participant-item">
-
-                        <input
-                            type="checkbox"
-                            value="${user.id}"
-                            class="participant-checkbox"
-                            ${currentUser &&
-                            user.id === currentUser.id
-                                ? "checked"
-                                : ""}
-                        >
-
-                        <span>
-                            ${escapeHTML(user.name)}
-                        </span>
-
-                    </label>
-
-                `
-            )
-            .join("");
-
-
-    if (currentUser) {
-
-        payerSelect.value =
-            currentUser.id;
-
+    if (!list) {
+        return;
     }
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "participant-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            class="participant-input"
+            placeholder="Enter participant name"
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            class="remove-participant-btn"
+            title="Remove participant"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+    `;
+
+
+    list.appendChild(row);
+
+
+    const removeButton =
+        row.querySelector(
+            ".remove-participant-btn"
+        );
+
+
+    removeButton.addEventListener(
+        "click",
+        function () {
+
+            const rows =
+                list.querySelectorAll(
+                    ".participant-row"
+                );
+
+
+            if (rows.length <= 1) {
+
+                row
+                    .querySelector(
+                        ".participant-input"
+                    )
+                    .value = "";
+
+                return;
+
+            }
+
+
+            row.remove();
+
+        }
+    );
+
+
+    row
+        .querySelector(
+            ".participant-input"
+        )
+        .focus();
+
+}
+
+
+/* =========================================================
+   GET PARTICIPANTS
+   ========================================================= */
+
+function getParticipantNames() {
+
+    const inputs =
+        document.querySelectorAll(
+            ".participant-input"
+        );
+
+
+    const names = [];
+
+
+    inputs.forEach(function (input) {
+
+        const name =
+            input.value.trim();
+
+
+        if (name) {
+
+            names.push(name);
+
+        }
+
+    });
+
+
+    return names;
 
 }
 
@@ -995,7 +1228,9 @@ function handleAddExpense(event) {
 
     if (!currentUser) {
 
-        alert("Please login first.");
+        alert(
+            "Please login first."
+        );
 
         return;
 
@@ -1021,28 +1256,25 @@ function handleAddExpense(event) {
         );
 
 
-    const payerId =
+    const payerName =
         document
             .getElementById(
                 "expensePayer"
             )
+            .value
+            .trim();
+
+
+    const splitMethod =
+        document
+            .getElementById(
+                "splitMethod"
+            )
             .value;
 
 
-    const participantCheckboxes =
-        document.querySelectorAll(
-            ".participant-checkbox:checked"
-        );
-
-
-    const participants =
-        Array.from(
-            participantCheckboxes
-        )
-        .map(
-            checkbox =>
-                checkbox.value
-        );
+    const participantNames =
+        getParticipantNames();
 
 
     if (!description) {
@@ -1070,10 +1302,10 @@ function handleAddExpense(event) {
     }
 
 
-    if (participants.length === 0) {
+    if (!payerName) {
 
         alert(
-            "Please select at least one participant."
+            "Please enter who paid."
         );
 
         return;
@@ -1082,16 +1314,67 @@ function handleAddExpense(event) {
 
 
     if (
-        !participants.includes(
-            payerId
-        )
+        participantNames.length === 0
     ) {
 
-        participants.push(
-            payerId
+        alert(
+            "Please enter at least one participant."
         );
 
+        return;
+
     }
+
+
+    const payerIncluded =
+        participantNames.some(function (name) {
+
+            return (
+                name.toLowerCase() ===
+                payerName.toLowerCase()
+            );
+
+        });
+
+
+    if (!payerIncluded) {
+
+        const addPayer =
+            confirm(
+                "The person who paid is not listed as a participant.\n\n" +
+                "Would you like to automatically add " +
+                payerName +
+                " as a participant?"
+            );
+
+
+        if (addPayer) {
+
+            participantNames.push(
+                payerName
+            );
+
+        } else {
+
+            return;
+
+        }
+
+    }
+
+
+    const peopleCount =
+        participantNames.length;
+
+
+    const share =
+        amount / peopleCount;
+
+
+    const roundedShare =
+        Math.round(
+            share * 100
+        ) / 100;
 
 
     const expense = {
@@ -1101,32 +1384,32 @@ function handleAddExpense(event) {
             Date.now(),
 
         description:
-
             description,
 
         amount:
+            Number(
+                amount.toFixed(2)
+            ),
 
-            amount,
+        payerName:
+            payerName,
 
-        payerId:
-
-            payerId,
+        splitMethod:
+            splitMethod,
 
         participants:
+            participantNames,
 
-            participants,
-
-        createdBy:
-
-            currentUser.id,
+        sharePerPerson:
+            roundedShare,
 
         date:
+            new Date().toLocaleString(),
 
-            new Date()
-                .toLocaleString(),
+        createdBy:
+            currentUser.id,
 
         status:
-
             "Recorded"
 
     };
@@ -1134,32 +1417,35 @@ function handleAddExpense(event) {
 
     expenses.unshift(expense);
 
-    createPaymentRecords(expense);
+
+    createPaymentsForExpense(
+        expense
+    );
+
 
     saveData();
 
 
-    event.target.reset();
+    document
+        .getElementById(
+            "expenseForm"
+        )
+        .reset();
 
 
-    populateExpenseUsers();
+    document
+        .getElementById(
+            "participantsList"
+        )
+        .innerHTML = "";
 
 
-    renderUserDashboard();
+    addParticipant();
 
-    renderExpenses();
 
-    renderBalances();
+    renderEverything();
 
-    renderHistory();
-
-    renderPayments();
-
-    renderAdminDashboard();
-
-    renderAdminExpenses();
-
-    renderAdminSummary();
+    renderAdminEverything();
 
 
     alert(
@@ -1173,19 +1459,20 @@ function handleAddExpense(event) {
    CREATE PAYMENT RECORDS
    ========================================================= */
 
-function createPaymentRecords(expense) {
+function createPaymentsForExpense(
+    expense
+) {
 
     const share =
-        expense.amount /
-        expense.participants.length;
+        expense.sharePerPerson;
 
 
     expense.participants.forEach(
-        participantId => {
+        function (participant) {
 
             if (
-                participantId ===
-                expense.payerId
+                participant.toLowerCase() ===
+                expense.payerName.toLowerCase()
             ) {
 
                 return;
@@ -1193,7 +1480,7 @@ function createPaymentRecords(expense) {
             }
 
 
-            const payment = {
+            payments.push({
 
                 id:
                     "payment_" +
@@ -1206,11 +1493,11 @@ function createPaymentRecords(expense) {
                 expenseId:
                     expense.id,
 
-                from:
-                    participantId,
+                fromName:
+                    participant,
 
-                to:
-                    expense.payerId,
+                toName:
+                    expense.payerName,
 
                 amount:
                     share,
@@ -1218,10 +1505,7 @@ function createPaymentRecords(expense) {
                 status:
                     "Pending"
 
-            };
-
-
-            payments.push(payment);
+            });
 
         }
     );
@@ -1230,90 +1514,256 @@ function createPaymentRecords(expense) {
 
 
 /* =========================================================
-   DASHBOARD CALCULATIONS
+   DELETE EXPENSE
    ========================================================= */
 
-function getUserOwedAmount(userId) {
+function deleteExpense(
+    expenseId
+) {
 
-    let total = 0;
+    const expense =
+        expenses.find(function (item) {
+
+            return (
+                item.id ===
+                expenseId
+            );
+
+        });
 
 
-    payments.forEach(
-        payment => {
+    if (!expense) {
 
-            if (
-                payment.from ===
-                userId &&
-                payment.status ===
-                "Pending"
-            ) {
+        alert(
+            "Expense not found."
+        );
 
-                total += payment.amount;
+        return;
 
-            }
+    }
 
-        }
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this expense?\n\n" +
+            expense.description +
+            " - " +
+            formatCurrency(
+                expense.amount
+            ) +
+            "\n\n" +
+            "This will also remove its related payment and balance records."
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /*
+       Remove the expense.
+    */
+
+    expenses =
+        expenses.filter(function (item) {
+
+            return (
+                item.id !==
+                expenseId
+            );
+
+        });
+
+
+    /*
+       Remove payment records
+       belonging to this expense.
+    */
+
+    payments =
+        payments.filter(function (payment) {
+
+            return (
+                payment.expenseId !==
+                expenseId
+            );
+
+        });
+
+
+    saveData();
+
+
+    /*
+       Refresh everything.
+    */
+
+    renderEverything();
+
+    renderAdminEverything();
+
+
+    alert(
+        "Expense deleted successfully."
     );
-
-
-    return total;
 
 }
 
 
-function getUserReceiveAmount(userId) {
+/* =========================================================
+   BALANCE CALCULATION
+   ========================================================= */
 
-    let total = 0;
+function calculateBalances() {
+
+    let youOwe = 0;
+
+    let youReceive = 0;
+
+    let settled = 0;
 
 
-    payments.forEach(
-        payment => {
+    const oweDetails = [];
+
+    const receiveDetails = [];
+
+
+    payments.forEach(function (payment) {
+
+        if (
+            payment.status ===
+            "Paid"
+        ) {
 
             if (
-                payment.to ===
-                userId &&
-                payment.status ===
-                "Pending"
+                isCurrentUserName(
+                    payment.fromName
+                )
             ) {
 
-                total += payment.amount;
+                settled +=
+                    Number(
+                        payment.amount
+                    );
 
             }
 
+            return;
+
         }
-    );
 
 
-    return total;
+        if (
+            isCurrentUserName(
+                payment.fromName
+            )
+        ) {
+
+            youOwe +=
+                Number(
+                    payment.amount
+                );
+
+
+            oweDetails.push({
+
+                name:
+                    payment.toName,
+
+                amount:
+                    Number(
+                        payment.amount
+                    ),
+
+                paymentId:
+                    payment.id
+
+            });
+
+        }
+
+
+        if (
+            isCurrentUserName(
+                payment.toName
+            )
+        ) {
+
+            youReceive +=
+                Number(
+                    payment.amount
+                );
+
+
+            receiveDetails.push({
+
+                name:
+                    payment.fromName,
+
+                amount:
+                    Number(
+                        payment.amount
+                    ),
+
+                paymentId:
+                    payment.id
+
+            });
+
+        }
+
+    });
+
+
+    return {
+
+        youOwe:
+            youOwe,
+
+        youReceive:
+            youReceive,
+
+        settled:
+            settled,
+
+        oweDetails:
+            oweDetails,
+
+        receiveDetails:
+            receiveDetails
+
+    };
 
 }
 
 
-function getUserSettledAmount(userId) {
+/* =========================================================
+   USER NAME MATCH
+   ========================================================= */
 
-    let total = 0;
+function isCurrentUserName(name) {
+
+    if (!currentUser) {
+
+        return false;
+
+    }
 
 
-    payments.forEach(
-        payment => {
+    return (
 
-            if (
-                (
-                    payment.from === userId ||
-                    payment.to === userId
-                ) &&
-                payment.status === "Paid"
-            ) {
+        String(name)
+            .trim()
+            .toLowerCase() ===
 
-                total += payment.amount;
+        String(currentUser.name)
+            .trim()
+            .toLowerCase()
 
-            }
-
-        }
     );
-
-
-    return total;
 
 }
 
@@ -1324,98 +1774,87 @@ function getUserSettledAmount(userId) {
 
 function renderUserDashboard() {
 
-    if (!currentUser) return;
+    if (!currentUser) {
+        return;
+    }
 
 
     const totalExpenses =
         expenses.reduce(
-            (
+            function (
                 total,
                 expense
-            ) =>
-                total +
-                Number(expense.amount),
+            ) {
 
+                return (
+                    total +
+                    Number(
+                        expense.amount
+                    )
+                );
+
+            },
             0
         );
 
 
-    document
-        .getElementById(
-            "dashboardTotalExpenses"
-        )
-        .textContent =
+    const balances =
+        calculateBalances();
+
+
+    setText(
+        "dashboardTotalExpenses",
         formatCurrency(
             totalExpenses
-        );
-
-
-    document
-        .getElementById(
-            "dashboardYouOwe"
         )
-        .textContent =
+    );
+
+
+    setText(
+        "dashboardYouOwe",
         formatCurrency(
-            getUserOwedAmount(
-                currentUser.id
-            )
-        );
-
-
-    document
-        .getElementById(
-            "dashboardYouReceive"
+            balances.youOwe
         )
-        .textContent =
+    );
+
+
+    setText(
+        "dashboardYouReceive",
         formatCurrency(
-            getUserReceiveAmount(
-                currentUser.id
-            )
-        );
-
-
-    document
-        .getElementById(
-            "dashboardSettled"
+            balances.youReceive
         )
-        .textContent =
+    );
+
+
+    setText(
+        "dashboardSettled",
         formatCurrency(
-            getUserSettledAmount(
-                currentUser.id
-            )
-        );
+            balances.settled
+        )
+    );
 
 
-    renderRecentExpenses();
-
-}
-
-
-/* =========================================================
-   RECENT EXPENSES
-   ========================================================= */
-
-function renderRecentExpenses() {
-
-    const container =
+    const recent =
         document.getElementById(
             "dashboardRecentExpenses"
         );
 
 
-    const recent =
-        expenses.slice(
-            0,
-            5
-        );
+    if (!recent) {
+        return;
+    }
 
 
-    if (recent.length === 0) {
+    if (expenses.length === 0) {
 
-        container.innerHTML = `
+        recent.innerHTML = `
+
             <div class="empty-state">
+
                 No expenses recorded yet.
+
             </div>
+
         `;
 
         return;
@@ -1423,63 +1862,33 @@ function renderRecentExpenses() {
     }
 
 
-    container.innerHTML =
-        recent
-            .map(
-                expense =>
-                    createExpenseHTML(
-                        expense
-                    )
-            )
+    recent.innerHTML =
+        expenses
+            .slice(0, 5)
+            .map(createExpenseHTML)
             .join("");
 
 }
 
 
 /* =========================================================
-   EXPENSE MANAGEMENT
+   EXPENSE HTML
    ========================================================= */
-
-function renderExpenses() {
-
-    const container =
-        document.getElementById(
-            "expenseManagementList"
-        );
-
-
-    if (expenses.length === 0) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                No expenses recorded yet.
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        expenses
-            .map(
-                expense =>
-                    createExpenseHTML(
-                        expense
-                    )
-            )
-            .join("");
-
-}
-
 
 function createExpenseHTML(expense) {
 
-    const payer =
-        getUserName(
-            expense.payerId
-        );
+    const participants =
+        expense.participants
+            ? expense.participants
+                .map(function (name) {
+
+                    return escapeHTML(
+                        name
+                    );
+
+                })
+                .join(", ")
+            : "Not available";
 
 
     return `
@@ -1489,32 +1898,82 @@ function createExpenseHTML(expense) {
             <div class="expense-info">
 
                 <strong>
+
                     ${escapeHTML(
                         expense.description
                     )}
+
                 </strong>
 
+
                 <span>
-                    Paid by ${escapeHTML(payer)}
+
+                    Paid by:
+                    ${escapeHTML(
+                        expense.payerName
+                    )}
+
                 </span>
+
+
+                <small>
+
+                    Participants:
+                    ${participants}
+
+                </small>
+
+
+                <small>
+
+                    Share per person:
+                    ${formatCurrency(
+                        expense.sharePerPerson || 0
+                    )}
+
+                </small>
+
+
+                <small>
+
+                    ${escapeHTML(
+                        expense.date
+                    )}
+
+                </small>
 
             </div>
 
 
             <div class="expense-amount">
 
-                ${formatCurrency(
-                    expense.amount
-                )}
+                <strong>
 
-            </div>
+                    ${formatCurrency(
+                        expense.amount
+                    )}
+
+                </strong>
 
 
-            <div class="expense-date">
+                <button
+                    type="button"
+                    class="delete-expense-btn"
+                    onclick="
+                        deleteExpense(
+                            '${expense.id}'
+                        )
+                    "
+                    title="Delete Expense"
+                >
 
-                ${escapeHTML(
-                    expense.date
-                )}
+                    <i
+                        class="fa-solid fa-trash"
+                    ></i>
+
+                    Delete
+
+                </button>
 
             </div>
 
@@ -1526,7 +1985,49 @@ function createExpenseHTML(expense) {
 
 
 /* =========================================================
-   BALANCE TRACKING
+   RENDER EXPENSES
+   ========================================================= */
+
+function renderExpenses() {
+
+    const container =
+        document.getElementById(
+            "expenseManagementList"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (expenses.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                No expenses recorded yet.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        expenses
+            .map(createExpenseHTML)
+            .join("");
+
+}
+
+
+/* =========================================================
+   BALANCES
    ========================================================= */
 
 function renderBalances() {
@@ -1543,120 +2044,131 @@ function renderBalances() {
         );
 
 
-    if (!currentUser) return;
+    if (!oweList || !receiveList) {
+        return;
+    }
 
 
-    const owePayments =
-        payments.filter(
-            payment =>
-                payment.from ===
-                currentUser.id &&
-                payment.status ===
-                "Pending"
-        );
+    const balances =
+        calculateBalances();
 
 
-    const receivePayments =
-        payments.filter(
-            payment =>
-                payment.to ===
-                currentUser.id &&
-                payment.status ===
-                "Pending"
-        );
-
-
-    if (owePayments.length === 0) {
+    if (
+        balances.oweDetails.length === 0
+    ) {
 
         oweList.innerHTML = `
+
             <div class="empty-state">
+
                 You don't owe anyone.
+
             </div>
+
         `;
 
     } else {
 
         oweList.innerHTML =
-            owePayments
-                .map(
-                    payment => `
+            balances.oweDetails
+                .map(function (item) {
+
+                    return `
 
                         <div class="balance-item">
 
                             <div class="balance-person">
 
-                                <i class="fa-solid fa-user"></i>
+                                <i
+                                    class="fa-solid fa-user"
+                                ></i>
 
                                 <span>
+
                                     You owe
-                                    <strong>
-                                        ${escapeHTML(
-                                            getUserName(
-                                                payment.to
-                                            )
-                                        )}
-                                    </strong>
+                                    ${escapeHTML(
+                                        item.name
+                                    )}
+
                                 </span>
 
                             </div>
 
+
                             <span class="amount owe">
+
                                 ${formatCurrency(
-                                    payment.amount
+                                    item.amount
                                 )}
+
                             </span>
 
                         </div>
 
-                    `
-                )
+                    `;
+
+                })
                 .join("");
 
     }
 
 
-    if (receivePayments.length === 0) {
+    if (
+        balances.receiveDetails.length === 0
+    ) {
 
         receiveList.innerHTML = `
+
             <div class="empty-state">
+
                 No one currently owes you.
+
             </div>
+
         `;
 
     } else {
 
         receiveList.innerHTML =
-            receivePayments
-                .map(
-                    payment => `
+            balances.receiveDetails
+                .map(function (item) {
+
+                    return `
 
                         <div class="balance-item">
 
                             <div class="balance-person">
 
-                                <i class="fa-solid fa-user"></i>
+                                <i
+                                    class="fa-solid fa-user"
+                                ></i>
 
                                 <span>
+
                                     ${escapeHTML(
-                                        getUserName(
-                                            payment.from
-                                        )
+                                        item.name
                                     )}
+
                                     owes you
+
                                 </span>
 
                             </div>
 
+
                             <span class="amount receive">
+
                                 ${formatCurrency(
-                                    payment.amount
+                                    item.amount
                                 )}
+
                             </span>
 
                         </div>
 
-                    `
-                )
+                    `;
+
+                })
                 .join("");
 
     }
@@ -1665,7 +2177,7 @@ function renderBalances() {
 
 
 /* =========================================================
-   EXPENSE HISTORY
+   HISTORY
    ========================================================= */
 
 function renderHistory() {
@@ -1676,12 +2188,21 @@ function renderHistory() {
         );
 
 
+    if (!container) {
+        return;
+    }
+
+
     if (expenses.length === 0) {
 
         container.innerHTML = `
+
             <div class="empty-state">
+
                 No expense history available.
+
             </div>
+
         `;
 
         return;
@@ -1691,19 +2212,14 @@ function renderHistory() {
 
     container.innerHTML =
         expenses
-            .map(
-                expense =>
-                    createExpenseHTML(
-                        expense
-                    )
-            )
+            .map(createExpenseHTML)
             .join("");
 
 }
 
 
 /* =========================================================
-   PAYMENT TRACKING
+   PAYMENTS
    ========================================================= */
 
 function renderPayments() {
@@ -1714,25 +2230,41 @@ function renderPayments() {
         );
 
 
-    if (!currentUser) return;
+    if (!container || !currentUser) {
+        return;
+    }
 
 
     const myPayments =
-        payments.filter(
-            payment =>
-                payment.from ===
-                    currentUser.id ||
-                payment.to ===
-                    currentUser.id
-        );
+        payments.filter(function (payment) {
+
+            return (
+
+                isCurrentUserName(
+                    payment.fromName
+                )
+
+                ||
+
+                isCurrentUserName(
+                    payment.toName
+                )
+
+            );
+
+        });
 
 
     if (myPayments.length === 0) {
 
         container.innerHTML = `
+
             <div class="empty-state">
+
                 No payment records available.
+
             </div>
+
         `;
 
         return;
@@ -1742,71 +2274,72 @@ function renderPayments() {
 
     container.innerHTML =
         myPayments
-            .map(
-                payment =>
-                    createPaymentHTML(
-                        payment
-                    )
-            )
+            .map(createPaymentHTML)
             .join("");
 
 }
 
 
+/* =========================================================
+   PAYMENT HTML
+   ========================================================= */
+
 function createPaymentHTML(payment) {
 
-    const isPayer =
-        payment.from ===
-        currentUser.id;
-
-
-    const otherPerson =
-        isPayer
-            ? getUserName(payment.to)
-            : getUserName(payment.from);
+    const currentUserIsPayer =
+        isCurrentUserName(
+            payment.fromName
+        );
 
 
     let description;
 
 
-    if (isPayer) {
+    if (currentUserIsPayer) {
 
         description =
-            `You owe ${escapeHTML(
-                otherPerson
-            )}`;
+            "You owe " +
+            escapeHTML(
+                payment.toName
+            );
 
     } else {
 
         description =
-            `${escapeHTML(
-                otherPerson
-            )} owes you`;
+            escapeHTML(
+                payment.fromName
+            ) +
+            " owes you";
 
     }
 
 
-    const action =
-        isPayer &&
-        payment.status ===
-            "Pending"
+    let button = "";
 
-            ? `
 
-                <button
-                    class="pay-btn"
-                    onclick="
-                        markPaymentPaid(
-                            '${payment.id}'
-                        )
-                    "
-                >
-                    Mark Paid
-                </button>
+    if (
+        currentUserIsPayer &&
+        payment.status === "Pending"
+    ) {
 
-            `
+        button = `
 
-            : "";
+            <button
+                class="pay-btn"
+                onclick="
+                    markPaymentPaid(
+                        '${payment.id}'
+                    )
+                "
+            >
+
+                Mark Paid
+
+            </button>
+
+        `;
+
+    }
 
 
     return `
@@ -1819,41 +2352,41 @@ function createPaymentHTML(payment) {
                     ${description}
                 </strong>
 
-                <div
-                    style="
-                        color:#64748b;
-                        font-size:12px;
-                        margin-top:5px;
-                    "
-                >
+                <small>
                     Payment
-                </div>
+                </small>
 
             </div>
 
 
             <strong>
+
                 ${formatCurrency(
                     payment.amount
                 )}
+
             </strong>
 
 
             <div>
 
                 <span
-                    class="payment-status
-                    ${
-                        payment.status ===
-                        "Paid"
-                            ? "paid"
-                            : "pending"
-                    }"
+                    class="
+                        payment-status
+                        ${
+                            payment.status === "Paid"
+                                ? "paid"
+                                : "pending"
+                        }
+                    "
                 >
+
                     ${payment.status}
+
                 </span>
 
-                ${action}
+
+                ${button}
 
             </div>
 
@@ -1865,37 +2398,35 @@ function createPaymentHTML(payment) {
 
 
 /* =========================================================
-   MARK PAYMENT AS PAID
+   MARK PAYMENT PAID
    ========================================================= */
 
 function markPaymentPaid(paymentId) {
 
     const payment =
-        payments.find(
-            item =>
+        payments.find(function (item) {
+
+            return (
                 item.id ===
                 paymentId
-        );
+            );
+
+        });
 
 
-    if (!payment) return;
+    if (!payment) {
+        return;
+    }
 
 
-    payment.status = "Paid";
+    payment.status =
+        "Paid";
 
 
     saveData();
 
 
-    renderUserDashboard();
-
-    renderBalances();
-
-    renderPayments();
-
-    renderAdminDashboard();
-
-    renderAdminSummary();
+    renderEverything();
 
 }
 
@@ -1906,72 +2437,76 @@ function markPaymentPaid(paymentId) {
 
 function renderAdminDashboard() {
 
-    const normalUsers =
-        users.filter(
-            user =>
+    const registeredUsers =
+        users.filter(function (user) {
+
+            return (
                 user.role === "user"
-        );
+            );
+
+        }).length;
 
 
     const totalAmount =
         expenses.reduce(
-            (
+            function (
                 total,
                 expense
-            ) =>
-                total +
-                Number(expense.amount),
+            ) {
 
+                return (
+                    total +
+                    Number(
+                        expense.amount
+                    )
+                );
+
+            },
             0
         );
 
 
-    const pendingPayments =
-        payments.filter(
-            payment =>
+    const pending =
+        payments.filter(function (payment) {
+
+            return (
                 payment.status ===
                 "Pending"
-        ).length;
+            );
+
+        }).length;
 
 
-    document
-        .getElementById(
-            "adminUserCount"
-        )
-        .textContent =
-        normalUsers.length;
+    setText(
+        "adminUserCount",
+        registeredUsers
+    );
 
 
-    document
-        .getElementById(
-            "adminExpenseCount"
-        )
-        .textContent =
-        expenses.length;
+    setText(
+        "adminExpenseCount",
+        expenses.length
+    );
 
 
-    document
-        .getElementById(
-            "adminTotalAmount"
-        )
-        .textContent =
+    setText(
+        "adminTotalAmount",
         formatCurrency(
             totalAmount
-        );
-
-
-    document
-        .getElementById(
-            "adminPendingPayments"
         )
-        .textContent =
-        pendingPayments;
+    );
+
+
+    setText(
+        "adminPendingPayments",
+        pending
+    );
 
 }
 
 
 /* =========================================================
-   ADMIN USER MANAGEMENT
+   ADMIN USERS
    ========================================================= */
 
 function renderAdminUsers() {
@@ -1982,16 +2517,23 @@ function renderAdminUsers() {
         );
 
 
+    if (!table) {
+        return;
+    }
+
+
     const registeredUsers =
-        users.filter(
-            user =>
+        users.filter(function (user) {
+
+            return (
                 user.role === "user"
-        );
+            );
+
+        });
 
 
     if (
-        registeredUsers.length ===
-        0
+        registeredUsers.length === 0
     ) {
 
         table.innerHTML = `
@@ -2000,12 +2542,11 @@ function renderAdminUsers() {
 
                 <td
                     colspan="5"
-                    style="
-                        text-align:center;
-                        color:#64748b;
-                    "
+                    style="text-align:center;"
                 >
+
                     No registered users.
+
                 </td>
 
             </tr>
@@ -2019,19 +2560,17 @@ function renderAdminUsers() {
 
     table.innerHTML =
         registeredUsers
-            .map(
-                user => `
+            .map(function (user) {
+
+                return `
 
                     <tr>
 
                         <td>
-                            <strong>
-                                ${escapeHTML(
-                                    user.name
-                                )}
-                            </strong>
+                            ${escapeHTML(
+                                user.name
+                            )}
                         </td>
-
 
                         <td>
                             ${escapeHTML(
@@ -2039,38 +2578,15 @@ function renderAdminUsers() {
                             )}
                         </td>
 
-
                         <td>
-
-                            <span
-                                class="
-                                    role-badge
-                                    user
-                                "
-                            >
-                                User
-                            </span>
-
+                            User
                         </td>
 
-
                         <td>
-
-                            <span
-                                class="
-                                    ${
-                                        user.status ===
-                                        "Active"
-                                            ? "status-active"
-                                            : "status-inactive"
-                                    }
-                                "
-                            >
-                                ${user.status}
-                            </span>
-
+                            ${escapeHTML(
+                                user.status
+                            )}
                         </td>
-
 
                         <td>
 
@@ -2082,12 +2598,13 @@ function renderAdminUsers() {
                                     )
                                 "
                             >
+
                                 ${
-                                    user.status ===
-                                    "Active"
+                                    user.status === "Active"
                                         ? "Deactivate"
                                         : "Activate"
                                 }
+
                             </button>
 
 
@@ -2102,15 +2619,18 @@ function renderAdminUsers() {
                                     )
                                 "
                             >
+
                                 Delete
+
                             </button>
 
                         </td>
 
                     </tr>
 
-                `
-            )
+                `;
+
+            })
             .join("");
 
 }
@@ -2123,19 +2643,23 @@ function renderAdminUsers() {
 function toggleUserStatus(userId) {
 
     const user =
-        users.find(
-            item =>
+        users.find(function (item) {
+
+            return (
                 item.id ===
                 userId
-        );
+            );
+
+        });
 
 
-    if (!user) return;
+    if (!user) {
+        return;
+    }
 
 
     user.status =
-        user.status ===
-        "Active"
+        user.status === "Active"
             ? "Inactive"
             : "Active";
 
@@ -2143,11 +2667,7 @@ function toggleUserStatus(userId) {
     saveData();
 
 
-    renderAdminUsers();
-
-    renderAdminDashboard();
-
-    populateExpenseUsers();
+    renderAdminEverything();
 
 }
 
@@ -2159,47 +2679,55 @@ function toggleUserStatus(userId) {
 function deleteUser(userId) {
 
     const user =
-        users.find(
-            item =>
+        users.find(function (item) {
+
+            return (
                 item.id ===
                 userId
-        );
+            );
+
+        });
 
 
-    if (!user) return;
+    if (!user) {
+        return;
+    }
 
 
     const confirmed =
         confirm(
-            `Delete ${user.name}'s account?`
+            "Delete " +
+            user.name +
+            "'s account?"
         );
 
 
-    if (!confirmed) return;
+    if (!confirmed) {
+        return;
+    }
 
 
     users =
-        users.filter(
-            item =>
+        users.filter(function (item) {
+
+            return (
                 item.id !==
                 userId
-        );
+            );
+
+        });
 
 
     saveData();
 
 
-    renderAdminUsers();
-
-    renderAdminDashboard();
-
-    populateExpenseUsers();
+    renderAdminEverything();
 
 }
 
 
 /* =========================================================
-   ADMIN EXPENSE MONITORING
+   ADMIN EXPENSES
    ========================================================= */
 
 function renderAdminExpenses() {
@@ -2210,12 +2738,21 @@ function renderAdminExpenses() {
         );
 
 
+    if (!container) {
+        return;
+    }
+
+
     if (expenses.length === 0) {
 
         container.innerHTML = `
+
             <div class="empty-state">
+
                 No expenses have been recorded.
+
             </div>
+
         `;
 
         return;
@@ -2225,175 +2762,202 @@ function renderAdminExpenses() {
 
     container.innerHTML =
         expenses
-            .map(
-                expense => `
-
-                    <div class="expense-item">
-
-                        <div class="expense-info">
-
-                            <strong>
-                                ${escapeHTML(
-                                    expense.description
-                                )}
-                            </strong>
-
-                            <span>
-                                Paid by
-                                ${escapeHTML(
-                                    getUserName(
-                                        expense.payerId
-                                    )
-                                )}
-                            </span>
-
-                        </div>
-
-
-                        <div class="expense-amount">
-
-                            ${formatCurrency(
-                                expense.amount
-                            )}
-
-                        </div>
-
-
-                        <div class="expense-date">
-
-                            ${escapeHTML(
-                                expense.date
-                            )}
-
-                        </div>
-
-                    </div>
-
-                `
-            )
+            .map(createExpenseHTML)
             .join("");
 
 }
 
 
 /* =========================================================
-   ADMIN EXPENSE SUMMARY
+   ADMIN SUMMARY
    ========================================================= */
 
 function renderAdminSummary() {
 
-    const totalSpending =
+    const total =
         expenses.reduce(
-            (
-                total,
+            function (
+                sum,
                 expense
-            ) =>
-                total +
-                Number(expense.amount),
+            ) {
 
+                return (
+                    sum +
+                    Number(
+                        expense.amount
+                    )
+                );
+
+            },
             0
         );
 
 
     const completed =
-        payments.filter(
-            payment =>
+        payments.filter(function (payment) {
+
+            return (
                 payment.status ===
                 "Paid"
-        ).length;
+            );
+
+        }).length;
 
 
     const pending =
-        payments.filter(
-            payment =>
+        payments.filter(function (payment) {
+
+            return (
                 payment.status ===
                 "Pending"
-        ).length;
+            );
+
+        }).length;
 
 
-    document
-        .getElementById(
-            "summaryTotalSpending"
-        )
-        .textContent =
-        formatCurrency(
-            totalSpending
-        );
+    setText(
+        "summaryTotalSpending",
+        formatCurrency(total)
+    );
 
 
-    document
-        .getElementById(
-            "summaryCompletedPayments"
-        )
-        .textContent =
-        completed;
+    setText(
+        "summaryCompletedPayments",
+        completed
+    );
 
 
-    document
-        .getElementById(
-            "summaryPendingPayments"
-        )
-        .textContent =
-        pending;
-
-}
-
-
-/* =========================================================
-   HELPER FUNCTIONS
-   ========================================================= */
-
-function getUserName(userId) {
-
-    const user =
-        users.find(
-            item =>
-                item.id ===
-                userId
-        );
-
-
-    return user
-        ? user.name
-        : "Unknown User";
-
-}
-
-
-function formatCurrency(amount) {
-
-    return (
-        "₹" +
-        Number(amount)
-            .toFixed(2)
+    setText(
+        "summaryPendingPayments",
+        pending
     );
 
 }
 
 
 /* =========================================================
-   SECURITY / DISPLAY HELPER
+   RENDER EVERYTHING
+   ========================================================= */
+
+function renderEverything() {
+
+    renderUserDashboard();
+
+    renderExpenses();
+
+    renderBalances();
+
+    renderHistory();
+
+    renderPayments();
+
+}
+
+
+/* =========================================================
+   RENDER ADMIN
+   ========================================================= */
+
+function renderAdminEverything() {
+
+    renderAdminDashboard();
+
+    renderAdminUsers();
+
+    renderAdminExpenses();
+
+    renderAdminSummary();
+
+}
+
+
+/* =========================================================
+   UPDATE USER HEADER
+   ========================================================= */
+
+function updateUserHeader() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    setText(
+        "loggedUserName",
+        currentUser.name
+    );
+
+
+    setText(
+        "loggedUserEmail",
+        currentUser.email
+    );
+
+}
+
+
+/* =========================================================
+   HELPER - SET TEXT
+   ========================================================= */
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+/* =========================================================
+   HELPER - CURRENCY
+   ========================================================= */
+
+function formatCurrency(amount) {
+
+    return (
+        "₹" +
+        Number(amount).toFixed(2)
+    );
+
+}
+
+
+/* =========================================================
+   HELPER - SECURITY
    ========================================================= */
 
 function escapeHTML(value) {
 
     return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
