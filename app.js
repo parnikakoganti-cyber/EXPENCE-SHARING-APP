@@ -2287,67 +2287,54 @@ function renderPayments() {
 function createPaymentHTML(payment) {
 
     const currentUserIsPayer =
-        isCurrentUserName(
-            payment.fromName
-        );
-
+        isCurrentUserName(payment.fromName);
 
     let description;
-
 
     if (currentUserIsPayer) {
 
         description =
             "You owe " +
-            escapeHTML(
-                payment.toName
-            );
+            escapeHTML(payment.toName);
 
     } else {
 
         description =
-            escapeHTML(
-                payment.fromName
-            ) +
+            escapeHTML(payment.fromName) +
             " owes you";
 
     }
 
-
     let button = "";
 
-
-    if (
-        currentUserIsPayer &&
-        payment.status === "Pending"
-    ) {
+    if (payment.status === "Pending") {
 
         button = `
-
             <button
                 class="pay-btn"
-                onclick="
-                    markPaymentPaid(
-                        '${payment.id}'
-                    )
-                "
+                onclick="togglePaymentStatus('${payment.id}')"
             >
-
                 Mark Paid
-
             </button>
+        `;
 
+    } else {
+
+        button = `
+            <button
+                class="pay-btn"
+                onclick="togglePaymentStatus('${payment.id}')"
+            >
+                Mark Pending
+            </button>
         `;
 
     }
 
-
     return `
-
         <div class="payment-item">
 
             <div>
-
                 <strong>
                     ${description}
                 </strong>
@@ -2355,79 +2342,49 @@ function createPaymentHTML(payment) {
                 <small>
                     Payment
                 </small>
-
             </div>
 
-
             <strong>
-
-                ${formatCurrency(
-                    payment.amount
-                )}
-
+                ${formatCurrency(payment.amount)}
             </strong>
-
 
             <div>
 
                 <span
-                    class="
-                        payment-status
-                        ${
-                            payment.status === "Paid"
-                                ? "paid"
-                                : "pending"
-                        }
-                    "
+                    class="payment-status ${
+                        payment.status === "Paid"
+                            ? "paid"
+                            : "pending"
+                    }"
                 >
-
                     ${payment.status}
-
                 </span>
-
 
                 ${button}
 
             </div>
 
         </div>
-
     `;
-
 }
+function togglePaymentStatus(paymentId) {
 
-
-/* =========================================================
-   MARK PAYMENT PAID
-   ========================================================= */
-
-function markPaymentPaid(paymentId) {
-
-    const payment =
-        payments.find(function (item) {
-
-            return (
-                item.id ===
-                paymentId
-            );
-
-        });
-
+    const payment = payments.find(function (item) {
+        return item.id === paymentId;
+    });
 
     if (!payment) {
         return;
     }
 
-
-    payment.status =
-        "Paid";
-
+    if (payment.status === "Pending") {
+        payment.status = "Paid";
+    } else {
+        payment.status = "Pending";
+    }
 
     saveData();
-
-
     renderEverything();
-
 }
 
 
