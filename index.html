@@ -594,7 +594,23 @@
 
                     </div>
 
+                    <div class="summary-card">
 
+                <div class="summary-icon green">
+        <i class="fa-solid fa-circle-check"></i>
+    </div>
+
+    <div>
+        <span>
+            You Received
+        </span>
+
+        <strong id="dashboardYouReceived">
+            ₹0.00
+        </strong>
+    </div>
+
+</div>
                     <div class="summary-card">
 
                         <div class="summary-icon purple">
@@ -655,6 +671,10 @@
                     </div>
 
                 </div>
+
+
+                <!-- REACT EXPENSE ANALYTICS -->
+                <div id="reactAnalyticsRoot"></div>
 
             </section>
 
@@ -1500,6 +1520,10 @@
 
 <!-- JAVASCRIPT -->
 
+<!-- React 18 must load before the analytics component and app.js. -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="analytics.js"></script>
 <script src="app.js"></script>
 
 </body>

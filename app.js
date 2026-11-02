@@ -2808,6 +2808,11 @@ function renderEverything() {
 
     renderPayments();
 
+    // Refresh the React analytics panel using the latest saved expenses.
+    if (typeof window.renderReactAnalytics === "function") {
+        window.renderReactAnalytics();
+    }
+
 }
 
 
